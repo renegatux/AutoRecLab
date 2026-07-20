@@ -1,0 +1,251 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2761
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 renegatux@MacBook-Air-Xenia AutoRecLab % uv run main.py\
+Enter you request, write "!start" to start:\
+> I\'92d like to run an experiment to quantify how much data split random seeds affect rec- ommender system accuracy. Please use LensKit 0.14.4 to test three algorithms: ALS, ItemKNN, and Pop. Run this on the following three datasets with implicit feedback: MovieLens100K, Amazon Video Games, Last.FM. The raw files are stored in your working directory with the filenames u.data, VideoGames.csv, UserTaggedArtists- timestamps.dat. First, preprocess all datasets with 5-core filtering. For the Amazon and MovieLens datasets, please also convert any ratings greater than 3 to implicit interactions. Here\'92s the main experimental procedure: Generate 5 different random seeds for data splitting. For each algorithm, dataset, and seed, please do a user-based 80/20 holdout split. Train all models using standard hyperparameters. For the analy- sis, I need you to measure nDCG@k and Precision@k for k=1, 5, 10 and conduct a short statistical analysis.\
+> !start\
+[05/17/26 18:42:39] INFO     Starting AutoRecLab...                                                                                                     main.py:25\
+                    INFO     Initializing agent...                                                                                             minimal_agent.py:52\
+                    INFO     Engineering code requirements...                                                                                 minimal_agent.py:508\
+[05/17/26 18:43:03] INFO     Done.                                                                                                            minimal_agent.py:527\
+                    INFO     Agent initialized!                                                                                                minimal_agent.py:64\
+                    INFO     Initializing agent...                                                                                              interpreter.py:102\
+                    INFO     Interpreter initialized!                                                                                           interpreter.py:112\
+                    INFO     Starting tree search...                                                                                                  search.py:63\
+                    INFO     Generating draft node 1/3                                                                                                search.py:66\
+[cyan]--------------------------------[/cyan]\
+[cyan]self.task_desc[/cyan]\
+[cyan] You are an expert recommender systems research assistant who is looking to help the user with their requests.\
+The user has some idea and you want to conduct creative experiments to gain scientific insights.\
+Your aim is to run experiments to gather sufficient results to report back to the user.\
+The idea is:\
+\
+I\'92d like to run an experiment to quantify how much data split random seeds affect rec- ommender system accuracy. Please use LensKit 0.14.4 to test three algorithms: ALS, ItemKNN, and Pop. Run this on the following three datasets with implicit feedback: MovieLens100K, Amazon Video Games, Last.FM. The raw files are stored in your working directory with the filenames u.data, VideoGames.csv, UserTaggedArtists- timestamps.dat. First, preprocess all datasets with 5-core filtering. For the Amazon and MovieLens datasets, please also convert any ratings greater than 3 to implicit interactions. Here\'92s the main experimental procedure: Generate 5 different random seeds for data splitting. For each algorithm, dataset, and seed, please do a user-based 80/20 holdout split. Train all models using standard hyperparameters. For the analy- sis, I need you to measure nDCG@k and Precision@k for k=1, 5, 10 and conduct a short statistical analysis.[/cyan]\
+[cyan]--------------------------------[/cyan]\
+MinimalAgent: Getting plan and code\
+MinimalAgent: Draft complete\
+[05/17/26 18:44:17] INFO     Node identified as buggy: LensKit was not actually exercised in the run: the environment appears to lack LensKit minimal_agent.py:571\
+                             0.14.4 (or API compatibility issues) causing the code to fall back to placeholders (algorithms become None) and                      \
+                             return random/synthetic predictions. This yields identical metrics across ALS, ItemKNN, and POP and a synthetic                      \
+                             dataset path rather than real data. Additionally, several robustness concerns exist (file path handling for                          \
+                             LastFM, 5-core filtering on synthetic data, and potential API mismatches). Fixes: ensure LensKit 0.14.4 is                           \
+                             installed and importable; remove the generic except fallback or raise a clear error if LensKit cannot be loaded;                     \
+                             verify correct LensKit API usage for ALS, ItemKNN, and Pop; use lenskit.batch.predict with a proper scored                           \
+                             output; load real data if present (don\'92t rely on synthetic generation); validate 5-core filtering results;                           \
+                             implement proper per-seed holdout and statistical tests (paired t-test or Wilcoxon) across seeds.                                    \
+                    INFO     Generating draft node 2/3                                                                                                search.py:66\
+[cyan]--------------------------------[/cyan]\
+[cyan]self.task_desc[/cyan]\
+[cyan] You are an expert recommender systems research assistant who is looking to help the user with their requests.\
+The user has some idea and you want to conduct creative experiments to gain scientific insights.\
+Your aim is to run experiments to gather sufficient results to report back to the user.\
+The idea is:\
+\
+I\'92d like to run an experiment to quantify how much data split random seeds affect rec- ommender system accuracy. Please use LensKit 0.14.4 to test three algorithms: ALS, ItemKNN, and Pop. Run this on the following three datasets with implicit feedback: MovieLens100K, Amazon Video Games, Last.FM. The raw files are stored in your working directory with the filenames u.data, VideoGames.csv, UserTaggedArtists- timestamps.dat. First, preprocess all datasets with 5-core filtering. For the Amazon and MovieLens datasets, please also convert any ratings greater than 3 to implicit interactions. Here\'92s the main experimental procedure: Generate 5 different random seeds for data splitting. For each algorithm, dataset, and seed, please do a user-based 80/20 holdout split. Train all models using standard hyperparameters. For the analy- sis, I need you to measure nDCG@k and Precision@k for k=1, 5, 10 and conduct a short statistical analysis.[/cyan]\
+[cyan]--------------------------------[/cyan]\
+MinimalAgent: Getting plan and code\
+MinimalAgent: Draft complete\
+[05/17/26 18:45:33] INFO     Node identified as buggy: The execution output reveals several blocking bugs that prevent the experiment from    minimal_agent.py:571\
+                             running:                                                                                                                             \
+                                                                                                                                                                  \
+                             1) Dataset loading/mapping issues:                                                                                                   \
+                             - MovieLens dataset read path u.data not found in the current working directory, causing a read error. Ensure                        \
+                             the file exists at the expected path (absolute paths or a verified working directory) or adjust the path                             \
+                             construction logic.                                                                                                                  \
+                             - A KeyError occurs because the file_map dictionary only defines a key for 'MovieLens100K', but later code                           \
+                             iterates over 'MovieLens100K', 'Amazon_Video_Games', and 'LastFM'. The mismatch between dataset keys causes                          \
+                             runtime failure when loading Amazon_Video_Games/LastFM.                                                                              \
+                             - The Amazon/LastFM file names in the code may not match actual local filenames (e.g., spaces in                                     \
+                             'UserTaggedArtists- timestamps.dat' or different capitalization). This leads to file-not-found errors.                               \
+                                                                                                                                                                  \
+                             2) Inconsistent dataset loader expectations:                                                                                         \
+                             - The read_dataset function hard-codes dataset formats (columns) and relies on the paths dictionary, but the                         \
+                             overarching paths mapping is inconsistent (ds keys vs file_map keys). This inconsistency will cause the loader                       \
+                             to fail for two datasets.                                                                                                            \
+                                                                                                                                                                  \
+                             3) LensKit API/import warning but not fatal in itself:                                                                               \
+                             - The import guard prints a warning that ndcg/precision could not be imported from lenskit.metrics, which would                      \
+                             break later metric computations if not guarded. If you intend to keep imports optional, ensure metrics are                           \
+                             computed via a robust path or guard access.                                                                                          \
+                                                                                                                                                                  \
+                             4) Evaluation scaffolding is placeholder-stubbed:                                                                                    \
+                             - The code uses a DummyModel fallback if LensKit is unavailable or if model API mismatches occur. This would                         \
+                             yield meaningless results for a scientific experiment. For a real run you must align with the LensKit API                            \
+                             (especially for ALS, ItemKNN, Pop) and ensure environment has LensKit installed.                                                     \
+                                                                                                                                                                  \
+                             5) Data conversion and 5-core filtering logic may prune data:                                                                        \
+                             - 5-core filtering could leave very small splits or even empty train/test for some seeds/datasets depending on                       \
+                             data size after loading. Ensure the preprocessing preserves enough data for all seeds.                                               \
+                                                                                                                                                                  \
+                             6) Overall robustness/enforcement:                                                                                                   \
+                             - Add explicit file existence checks, consistent path handling, explicit dataset keys, and clear separation of                       \
+                             data loading vs experimental loops to avoid hard-to-trace KeyErrors.                                                                 \
+                                                                                                                                                                  \
+                             Suggestions to fix quickly:                                                                                                          \
+                             - Unify dataset keys: use a single dictionary with keys 'MovieLens100K','Amazon_Video_Games','LastFM' for                            \
+                             file_map and paths, e.g., file_map = \{'MovieLens100K': \{'ml':'u.data'\}, 'Amazon_Video_Games':                                        \
+                             \{'amazon':'VideoGames.csv'\}, 'LastFM': \{'lastfm':'UserTaggedArtists-timestamp.dat'\}\} and pass the same keys to                       \
+                             read_dataset.                                                                                                                        \
+                             - Ensure all listed files exist in the working directory or provide absolute paths; add os.path.exists checks                        \
+                             and helpful error messages.                                                                                                          \
+                             - Correct the Amazon/LastFM file names to match your actual filenames. Avoid spaces in filenames or adjust the                       \
+                             paths accordingly.                                                                                                                   \
+                             - Guard against metric-import failures by either ensuring LensKit provides those functions in this version or by                     \
+                             computing metrics manually / with an alternate import path.                                                                          \
+                             - Replace the DummyModel fallback with real LensKit algorithm instances when the package is available, and                           \
+                             ensure API compatibility (fit/predict_for_user or similar).                                                                          \
+                             - Consider moving 5-core filtering after a consistent initial load and before implicit conversion to ensure                          \
+                             enough data remains.                                                                                                                 \
+                    INFO     Generating draft node 3/3                                                                                                search.py:66\
+[cyan]--------------------------------[/cyan]\
+[cyan]self.task_desc[/cyan]\
+[cyan] You are an expert recommender systems research assistant who is looking to help the user with their requests.\
+The user has some idea and you want to conduct creative experiments to gain scientific insights.\
+Your aim is to run experiments to gather sufficient results to report back to the user.\
+The idea is:\
+\
+I\'92d like to run an experiment to quantify how much data split random seeds affect rec- ommender system accuracy. Please use LensKit 0.14.4 to test three algorithms: ALS, ItemKNN, and Pop. Run this on the following three datasets with implicit feedback: MovieLens100K, Amazon Video Games, Last.FM. The raw files are stored in your working directory with the filenames u.data, VideoGames.csv, UserTaggedArtists- timestamps.dat. First, preprocess all datasets with 5-core filtering. For the Amazon and MovieLens datasets, please also convert any ratings greater than 3 to implicit interactions. Here\'92s the main experimental procedure: Generate 5 different random seeds for data splitting. For each algorithm, dataset, and seed, please do a user-based 80/20 holdout split. Train all models using standard hyperparameters. For the analy- sis, I need you to measure nDCG@k and Precision@k for k=1, 5, 10 and conduct a short statistical analysis.[/cyan]\
+[cyan]--------------------------------[/cyan]\
+MinimalAgent: Getting plan and code\
+MinimalAgent: Draft complete\
+[05/17/26 18:46:46] INFO     Node identified as buggy: Bug report: The run failed during dataset loading with FileNotFoundError: './u.data'.  minimal_agent.py:571\
+                             The dataset loader uses a path '.' for MovieLens (DATASETS['movielens_100k']['path'] = '.'), but the raw files                       \
+                             are described as residing in a 'working' directory. As a result, load_dataset tries to open './u.data' relative                      \
+                             to the execution CWD, which may not contain the file, causing the crash. Proposed fixes:                                             \
+                             - Align dataset paths with the actual location. E.g., set the path to the same folder as working_dir, or modify                      \
+                             load_dataset to search under the 'working' directory (e.g., path = os.path.join(working_dir, cfg['file'])).                          \
+                             - Do the same for amazon_videogames and lastfm: ensure VideoGames.csv and UserTaggedArtists- timestamps.dat                          \
+                             exist at the resolved path. Be mindful of the exact filename (the last one has a space in the provided name;                         \
+                             verify actual filename).                                                                                                             \
+                             - Consider using absolute paths or building paths from a single base (e.g., base_dir = os.path.join(os.getcwd(),                     \
+                             'working')), then path = os.path.join(base_dir, cfg['file']).                                                                        \
+                             - Optionally fix 'names' handling for amazon dataset (set proper column names or inspect header).                                    \
+                                                                                                                                                                  \
+                             Rationale: The failure is due to a misconfigured data path, not a logical fault in the training loop. After                          \
+                             fixing paths, the 5-core filtering, implicit conversion, 5 seeds, and 80/20 splits can proceed.                                      \
+                    INFO     Treesearch iteration 1/10                                                                                                search.py:74\
+[05/17/26 18:47:57] INFO     Node identified as buggy: The execution failed with ImportError: cannot import name 'Pop' from                   minimal_agent.py:571\
+                             lenskit.algorithms. In LensKit 0.14.4, Pop is not exported from lenskit.algorithms; import from                                      \
+                             lenskit.algorithms.pop instead (e.g., from lenskit.algorithms.pop import Pop). Also additional issues:                               \
+                             to_implicit currently filters out ratings <= 3 instead of converting them to implicit; should keep all rows and                      \
+                             set rating to 1 for ratings > 3. The final print statement in the main loop is erroneous and will raise an                           \
+                             exception. Ensure dataset paths exist and that LensKit 0.14.4 is installed (pip install lenskit==0.14.4). After                      \
+                             patching, re-run.                                                                                                                    \
+                    INFO     Treesearch iteration 2/10                                                                                                search.py:74\
+[05/17/26 18:49:09] INFO     Node identified as buggy: Execution failed due to import error: ModuleNotFoundError: No module named             minimal_agent.py:571\
+                             'lenskit.algorithms.pop'. This suggests LensKit 0.14.4 is not installed or the API surface differs in the                            \
+                             environment (the Pop algorithm submodule isn't accessible). As a result, the experiment cannot proceed. Other                        \
+                             potential issues include: (1) dataset file path resolution assumes a 'working' subdirectory; (2) possible                            \
+                             mismatch in dataset handling for implicit feedback; (3) the code relies on lenskit.batch.predict which may                           \
+                             differ by version. Recommendations: ensure the exact LensKit version is installed (pip install lenskit==0.14.4)                      \
+                             and verify module paths; if Pop is not available in this version, either upgrade/downgrade LensKit to a version                      \
+                             where Pop exists or implement a fallback/popularity-based predictor within the script; also confirm that dataset                     \
+                             files are accessible at the expected paths (the script looks under a 'working' directory).                                           \
+                    INFO     Treesearch iteration 3/10                                                                                                search.py:74\
+[05/17/26 18:50:12] INFO     Node identified as buggy: ImportError: lenskit.algorithms.pop module not found when importing Pop. This prevents minimal_agent.py:571\
+                             execution from even preprocessing the datasets. Likely due to API or packaging differences in LensKit 0.14.4:                        \
+                             the Pop algorithm may be located under a different import path (e.g., from lenskit.algorithms import Pop) or the                     \
+                             installed package version does not include the pop module. Fix: make imports robust with fallbacks and ensure                        \
+                             LensKit 0.14.4 is installed. Example: try `from lenskit.algorithms.pop import Pop` and if that fails, try `from                      \
+                             lenskit.algorithms import Pop` (or adjust to the actual available path). Also verify that the version actually                       \
+                             ships Pop; if not, switch to a version that does or adjust the experiment to test an available baseline.                             \
+                    INFO     Treesearch iteration 4/10                                                                                                search.py:74\
+[05/17/26 18:51:03] INFO     Node identified as buggy: Execution failure due to missing Pop import in LensKit 0.14.4. The script imports      minimal_agent.py:571\
+                             'from lenskit.algorithms.pop import Pop', but the module 'lenskit.algorithms.pop' is not present in the used                         \
+                             LensKit distribution, causing ModuleNotFoundError and early exit. This prevents any dataset processing or metric                     \
+                             computation. Potential fixes:                                                                                                        \
+                             - Verify and install a LensKit version where Pop is exposed as expected (e.g., 0.14.4) and confirm the import                        \
+                             path.                                                                                                                                \
+                             - Adapt the import to be version-robust, e.g. try:                                                                                   \
+                               from lenskit.algorithms import Pop                                                                                                 \
+                               except ImportError:                                                                                                                \
+                                   try:                                                                                                                           \
+                                       from lenskit.algorithms import pop as pop_mod                                                                              \
+                                       Pop = pop_mod.Pop                                                                                                          \
+                                   except Exception:                                                                                                              \
+                                       raise SystemExit("Pop algorithm not available in this LensKit distribution; consider                                       \
+                             upgrading/downgrading LensKit or using an alternative algorithm.")                                                                   \
+                             - Alternatively, check if Pop is not provided in this build; remove Pop usage or replace with a different                            \
+                             baseline (e.g., a simple MostPopular recommender) for compatibility.                                                                 \
+                    INFO     Treesearch iteration 5/10                                                                                                search.py:74\
+[05/17/26 18:52:00] INFO     Node identified as buggy: Execution failed due to missing dataset files. The preprocessing script raises         minimal_agent.py:571\
+                             FileNotFoundError when loading MovieLens u.data: resolve_path(cfg['path']) checks for the file in the working/                       \
+                             directory (u.data), but the file is not present there. This stops execution before any model training, so no                         \
+                             metrics are produced. Potential related issues include: (1) potential mismatch or misnaming of dataset files                         \
+                             (e.g., LastFM file name 'UserTaggedArtists- timestamps.dat' contains an extra space; Amazon dataset handling is                      \
+                             not implemented in the code path), (2) reliance on a specific working directory structure that may not exist in                      \
+                             the runtime environment, (3) the code does not verify file existence before reading, leading to abrupt crashes.                      \
+                             Recommended fixes: - Ensure all data files exist at the expected paths (working/u.data, working/VideoGames.csv,                      \
+                             working/UserTaggedArtists- timestamps.dat or correct the filename). - Improve path resolution to search more                         \
+                             robustly (absolute paths, environment variable DATA_DIR, or fallback to current working directory). - Normalize                      \
+                             and validate dataset file names to avoid spaces or typos; adjust code to handle LastFM filename correctly. - Add                     \
+                             preflight file checks and descriptive error messages; consider catching FileNotFoundError and aborting with a                        \
+                             clear diagnostic. - Consider adding a dataset loader that can discover files and map them to dataset configs                         \
+                             automatically, and include a log of which datasets were loaded and filtered.                                                         \
+                    INFO     Treesearch iteration 6/10                                                                                                search.py:74\
+[05/17/26 18:52:50] INFO     Node identified as buggy: Execution failure due to missing Pop algorithm import from LensKit 0.14.4. The code    minimal_agent.py:571\
+                             imports Pop from lenskit.algorithms, but the module does not export a symbol named Pop in this version, causing                      \
+                             ImportError and aborting the run. Causes: API change or packaging mismatch. Impact: The experiment cannot run as                     \
+                             specified and will crash at import time. Suggested fixes:                                                                            \
+                             - Verify LensKit version and API: ensure lenskit==0.14.4 is installed and that the Pop algorithm is supported in                     \
+                             this version. Check the official docs for the correct import path.                                                                   \
+                             - If Pop is not available in the current API, replace with an alternative baselines such as a simple                                 \
+                             popularity-based recommender implemented via lenskit's supported API (e.g., import from                                              \
+                             lenskit.algorithms.popular or lenskit.algorithms.popularity depending on the API) or implement a minimal                             \
+                             Pop-like scorer using batch.predict on a precomputed popularity score per item.                                                      \
+                             - Add a robust import wrapper: try importing Pop from multiple possible modules, and fall back to a placeholder                      \
+                             or skip the algorithm if unavailable, logging a clear message.                                                                       \
+                             - Ensure environment consistency: reinstall LensKit with the exact version, e.g., pip install 'lenskit==0.14.4'                      \
+                             and avoid version drift in the virtual environment.                                                                                  \
+                    INFO     Treesearch iteration 7/10                                                                                                search.py:74\
+[05/17/26 18:53:36] INFO     Node identified as buggy: FileNotFoundError during dataset loading: the script cannot locate the dataset files   minimal_agent.py:571\
+                             (u.data, VideoGames.csv, UserTaggedArtists- timestamps.dat) in the expected working/ directory. The code uses a                      \
+                             redundant 'working' subdirectory and a bespoke locate_dataset_path with special casing for LastFM, causing path                      \
+                             resolution to fail. Suggested fixes: (1) define a single stable data_dir (e.g., data/ or current working                             \
+                             directory) and place all raw files there; (2) simplify path resolution to check absolute/relative paths                              \
+                             unambiguously; (3) fix the LastFM filename to a valid, consistent name (likely UserTaggedArtists-timestamps.dat)                     \
+                             or implement a robust directory search; (4) remove creating an extra 'working' directory if not required; (5)                        \
+                             log attempted paths for easier debugging and/or add a configuration option to pass absolute dataset paths.                           \
+                    INFO     Treesearch iteration 8/10                                                                                                search.py:74\
+[05/17/26 18:54:41] INFO     Node identified as buggy: Execution failure due to ImportError: cannot import name 'Pop' from                    minimal_agent.py:571\
+                             'lenskit.algorithms'. This indicates an API/structure mismatch with LensKit 0.14.4: Pop is not exported from                         \
+                             lenskit.algorithms. The fix is to import Pop from its correct submodule (e.g., lenskit.algorithms.pop) or adjust                     \
+                             to the version's API. Additionally, ensure LensKit 0.14.4 is installed in the environment.                                           \
+                    INFO     Treesearch iteration 9/10                                                                                                search.py:74\
+[05/17/26 18:55:41] INFO     Node identified as buggy: Dataset file not found during startup: the script cannot locate the raw data u.data in minimal_agent.py:571\
+                             the expected working directory. locate_dataset_path() searches several candidates but does not reliably point to                     \
+                             the 'working' data directory where the user placed the files (the log shows candidates like /workspace/u.data,                       \
+                             which do not exist). Potential filename mismatch for Last.FM file (UserTaggedArtists- timestamps.dat vs                              \
+                             UserTaggedArtists-timestamps.dat) could also cause issues. Fix: unify and robustly resolve the data directory                        \
+                             (e.g., check a dedicated data_root like ./working or an environment variable DATA_ROOT first), and ensure                            \
+                             filenames match exactly (or implement a filesystem search that tolerates minor variations). After fixing paths,                      \
+                             rerun the pipeline to collect the 45 runs (3 datasets x 3 algorithms x 5 seeds).                                                     \
+                    INFO     Treesearch iteration 10/10                                                                                               search.py:74\
+[05/17/26 18:56:37] INFO     Node identified as buggy: Import error: No module named 'lenskit.algorithms.pop' when importing Pop. In LensKit  minimal_agent.py:571\
+                             0.14.4 the Pop algorithm is not exposed at that path in the environment; this causes the script to terminate                         \
+                             before running experiments. Suggested fixes: verify LensKit installation and API for 0.14.4; adjust imports to                       \
+                             match the actual API (e.g., import the pop module as 'from lenskit.algorithms import pop as pop' and instantiate                     \
+                             'pop.Pop()', or import 'from lenskit.algorithms import Pop' if supported by the version). Ensure the environment                     \
+                             actually has lenskit==0.14.4 installed (pip install lenskit==0.14.4) and that the module path exists. If Pop is                      \
+                             unavailable in this build, consider removing it or conditionally importing it. Additionally, re-run after                            \
+                             ensuring the API alignment (and consider upgrading or pinning to a version where Pop API is stable).                                 \
+                    WARNING  SAVING 3.....                                                                                                           search.py:121\
+                    WARNING  Found no satisfactory node; Using best node instead...                                                                   search.py:94\
+Traceback (most recent call last):\
+  File "/Users/renegatux/PycharmProjects/AutoRecLab/main.py", line 32, in <module>\
+    main()\
+  File "/Users/renegatux/PycharmProjects/AutoRecLab/main.py", line 28, in main\
+    ts.run()\
+  File "/Users/renegatux/PycharmProjects/AutoRecLab/treesearch/search.py", line 96, in run\
+    best_node = self.best_good_node\
+                ^^^^^^^^^^^^^^^^^^^\
+  File "/Users/renegatux/PycharmProjects/AutoRecLab/treesearch/search.py", line 46, in best_good_node\
+    return good_nodes[0]\
+           ~~~~~~~~~~^^^\
+IndexError: list index out of range\
+}
