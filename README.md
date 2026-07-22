@@ -1,292 +1,364 @@
-> [!CAUTION]
-> This is the active **development branch** (`develop`) of AutoRecLab v2.
->
-> - Features can change at any time.
-> - Interfaces and prompts may be unstable.
-> - Experimental behavior is expected.
->
-> For the latest stable release (v1), use the [`main`](../../tree/main) branch.
+# Team 6 — AutoRecLab in the Wild
 
-### Prerequisites: Embeddings
+This repository contains the logs, configuration, and reproduction notes for Team 6's Machine Learning Lab project:
 
-This version of AutoRecLab requires pre-generated embeddings for LensKit, RecBole, and OmniRec libraries.
-For the Docker container to function correctly, these files must be placed in the project's working directory.
+**AutoRecLab in the Wild: Prompt Sensitivity Meets Run Stability**
 
-**Setup Instructions:**
+We investigated how sensitive and stable AutoRecLab is when running recommender-system experiments with prompts of different detail levels. Our study focused on three prompt variants, two LLM backends, and 16 experimental runs in total.
 
-1. **Download the embeddings:** Get the files from [this link](https://1drv.ms/f/c/04375478f480c0d7/IgCMRP8a-P6yTKIUflpDpq0zAQGu9UPOn0rt_0VydNMC0iY?e=MyC9Yz). You can either download them as a ZIP archive and extract them, or download the folders directly.
-2. **Create the directory:** Inside your AutoRecLab working directory, create a new folder named `ragEmbeddings`.
-3. **Move the files:** Place the `lenskit`, `recbole`, and `omnirec` folders (which contain the `.pkl` and `.faiss` files) into the `ragEmbeddings` directory.
-
-```text
-AutoRecLab/
-├── ragEmbeddings/
-│   ├── lenskit/
-│   │   ├── ... (.pkl and .faiss files)
-│   ├── omnirec/
-│   │   ├── ... (.pkl and .faiss files)
-│   └── recbole/
-│       └── ... (.pkl and .faiss files)
-├── Dockerfile
-├── docker-compose.yml
-└── ... (other AutoRecLab files)
-```
-> [!CAUTION]
-If errors occur while building the docker container it is most likely an issue regarding the docker-entrypoint.sh, which generates the ragEmbeddings automatically while building the container if they are not contained in your Working Directory.
-In that case, delete the line "ENTRYPOINT ["/app/docker-entrypoint.sh"]" from the Dockerfile.
-
-
-# AutoRecLab v2 (Develop): Towards an Autonomous Recommender-Systems Researcher
-
-AutoRecLab is an autonomous research agent for recommender-systems experimentation.
-It turns a natural-language research task into executable code, evaluates intermediate results, and improves solutions iteratively via tree search.
-
-This `develop` branch is where new features are integrated continuously between paper releases.
-
-## Why this branch exists
-
-Your project follows a publication-driven release process:
-
-- `develop`: active development, frequent changes, newest features
-- `main`: stable snapshot that is updated when a new releases are considered
-
-If you need reproducible, publication-stable behavior, use `main`.
-If you want the newest capabilities, use `develop`.
-
-## Current v2 focus (develop)
-
-- Autonomous iterative code improvement with tree search
-- Requirement engineering from free-form research prompts
-- Built-in execution, scoring, and debugging loops
-- RAG-assisted documentation lookup (OmniRec, LensKit, RecBole) via FAISS indices
-- Configurable model/runtime behavior via `config.toml` and environment variables
-- Python type checking before code execution to improve a reliable execution of the generated code
-
-## Requirements
-
-- Python >= 3.12
-- One of:
-  - uv (https://docs.astral.sh/uv/) (recommended)
-  - Docker + Docker Compose
-  - pip (works, but uv is preferred in this project)
-- Graphviz (`dot`) available on `PATH` (required by runtime checks)
-- OpenAI API key (needed for LLM calls and embedding generation)
-
-## Quick start
-
-### Option A: Docker (recommended for isolated runs)
-
-1. Create `.env` in the repository root:
-
-	```env
-	OPENAI_API_KEY=your-key-here
-	```
-
-2. Run the sandbox container:
-
-	```bash
-	docker compose run --build sandbox
-	```
-
-Notes:
-- The container entrypoint generates/updates documentation embeddings on startup.
-- Outputs are written to `./sandbox` on the host (mounted to `/app/out` in the container).
-
-### Option B: Local with uv
-
-1. Install dependencies:
-
-	```bash
-	uv sync
-	```
-
-2. Create `.env` (same as above) or export your API key in the shell.
-
-3. (Recommended once) Generate documentation embeddings locally:
-
-	```bash
-	uv run python -m cli.embeddings.main generate --all
-	```
-
-4. Start AutoRecLab:
-
-	```bash
-	uv run main.py
-	```
-
-### Option C: Local with pip
-
-```bash
-pip install -e .
-python main.py
-```
-
-## Running the agent
-
-After start, enter a multi-line research task and finish with `!start`:
-
-```text
-Enter you request, write "!start" to start:
-> Build a reproducible top-N recommendation experiment on MovieLens.
-> Compare two candidate algorithms and report NDCG@10, Recall@10.
-> !start
-```
-
-At runtime, AutoRecLab will:
-1. derive concrete code requirements,
-2. generate multiple candidate implementations,
-3. execute and evaluate them,
-4. debug/improve candidates iteratively,
-5. stop when iteration budget/satisfaction criteria are reached.
-
-
-## CLI Usage
-
-**Inline prompt:**
-```bash
-uv run main.py --prompt "Analyze the signal and generate a report"
-```
-
-**Load prompt from an file:**
-```bash
-uv run main.py --prompt-file ./my-prompt.txt
-```
-
-**Don't log entered prompt in /entered_prompt.txt:**
-```bash
-uv run main.py --prompt-no-log
-```
-
-**Initialize workspace:**
-```bash
-uv run main.py --init
-```
-
-**List all available datasets:**
-```bash
-uv run main.py --list-datasets
-```
-
-**List all available models:**
-```bash
-uv run main.py --list-models
-```
-
-**Set model:**
-```bash
-uv run main.py --model "gpt-4o"
-```
-
-## Embeddings / documentation index
-
-AutoRecLab uses FAISS vector stores in `ragEmbeddings/` for docs-aware coding.
-
-Generate/update manually:
-
-```bash
-uv run python -m cli.embeddings.main generate --all
-```
-
-Useful flags:
-- `--omnirec`, `--lenskit`, `--recbole` (select subset)
-- `-f` / `--force` (overwrite existing index)
-- `-o` (custom output directory)
-
-## Configuration
-
-Main config file: `config.toml`
-
-Example (current defaults in this branch):
-
-```toml
-out_dir = "./out"
-
-[treesearch]
-num_draft_nodes = 3
-debug_prob = 0.3
-epsilon = 0.4
-max_iterations = 5
-
-[exec]
-timeout = 5400
-enable_type_checking = true
-max_type_check_attempts = 3
-keep_only_relevant_files = false
-
-[agent]
-k_fold_validation = 1
-
-[agent.code]
-model = "gpt-5-mini"
-model_temp = 1.0
-```
-
-Environment override pattern:
-- Prefix: `ARL_`
-- Nested fields via `__`
-
-Examples:
-- `ARL_out_dir=./sandbox`
-- `ARL_treesearch__max_iterations=8`
-- `ARL_agent__code__model=gpt-5-mini`
-
-Logging level can be set via:
-- `ISGSA_LOG=DEBUG|INFO|WARNING|ERROR`
-
-Experiments with large datasets on limited disk space:
-- `keep_only_relevant_files=false`: All output generated by AutoRecLab per node is saved and logged
-- `keep_only_relevant_files=true`: Only the actual AutoRecLab output (in the form of code and results) is saved. Files such as saved trained models are deleted.
-
-## Outputs
-
-Depending on your `out_dir`, AutoRecLab writes artifacts such as:
-
-- `code_requirements.json` (engineered requirements)
-- `save.pkl` (tree state)
-- intermediate generated code/checkpoints/plots/metadata
-- execution logs (if you use shell redirection or helper scripts)
-
-Utility for visualizing saved tree state:
-
-```bash
-uv run viz.py -i ./out/save.pkl -o ./out/tree_render
-```
-
-## Development workflow
-
-Install development dependencies via `uv sync`, then run tests:
-
-```bash
-uv run pytest
-```
-
-Project includes:
-- unit tests under `tests/`
-- tree search core under `treesearch/`
-- embedding CLI under `cli/embeddings/`
-- utility package workspace member under `packages/dataloader/`
-
-## Repository structure (high level)
-
-```text
-.
-├── main.py                    # Entry point
-├── config.toml                # Runtime config
-├── compose.yaml               # Docker sandbox service
-├── cli/embeddings/            # Embedding index tooling
-├── treesearch/                # Core agent/search/execution logic
-├── ragEmbeddings/             # FAISS indices for docs retrieval
-├── sandbox/                   # Sandbox outputs/workspace
-├── tests/                     # Tests
-└── viz.py                     # Tree rendering utility
-```
-
-## Known develop-branch caveats
-
-- Behavior and prompt contracts can change without notice.
-- Some experimental backend/model combinations may be incomplete.
+The final report and presentation were submitted separately via the course submission system and are not included in this repository.
 
 ---
 
-If you need stable, citable behavior for publication artifacts, use [`main`](../../tree/main).
-For active feature development and newest research tooling, stay on `develop`.
+## Repository Information
+
+**Fork:** <https://github.com/renegatux/AutoRecLab>
+
+**Branch / commit used for the project:**
+
+```text
+Branch: main / develop
+Commit: cf2be33f70843aa9ac9aa9b0fcb4eb543185469b
+```
+
+The experimental runs were executed on the `main` branch. Later upstream contributions such as pull requests, issues, and the discussion were prepared for the upstream project and/or the `develop` workflow.
+
+The experiment logs are available in:
+
+```text
+logs/output_log/
+```
+
+---
+
+## Upstream Contributions
+
+As part of the project, we also contributed to the upstream AutoRecLab repository.
+
+### Pull Requests
+
+- [#54 Dead-code removal and redundant good-nodes list cleanup](https://github.com/ISG-Siegen/AutoRecLab/pull/54)
+- [#63 Parallel per-requirement scoring](https://github.com/ISG-Siegen/AutoRecLab/pull/63)
+- [#64 Interpreter.cleanup_session stub implementation](https://github.com/ISG-Siegen/AutoRecLab/pull/64)
+
+### Issues
+
+- [#47 Pre-run file validation before tree search](https://github.com/ISG-Siegen/AutoRecLab/issues/47)
+- [#62 Reviewer scores miss scientific invalidity](https://github.com/ISG-Siegen/AutoRecLab/issues/62)
+
+### Discussion
+
+- [#61 Estimated time remaining during runs](https://github.com/ISG-Siegen/AutoRecLab/discussions/61)
+
+---
+
+## Repository Structure
+
+The most relevant project files are:
+
+```text
+logs/output_log/       Raw logs of our AutoRecLab runs
+treesearch/            AutoRecLab tree-search and agent implementation
+config.toml            Main configuration file, including model selection
+main.py                AutoRecLab entry point
+README.md              This project README
+```
+
+The raw logs are stored in:
+
+```text
+logs/output_log/
+```
+
+The repository currently contains the following experiment log files:
+
+```text
+Detailed_prompt_Run1.txt
+Detailed_prompt_Run2.txt
+Detailed_prompt_Run3.txt
+Detailed_prompt_Run4.txt
+
+Preprint_prompt_GPT_5.4_Run1+Run2.rtf
+Preprint_prompt_GPT_5.4_Run3.txt
+Preprint_prompt_GPT_5.4_Run4.txt
+
+Preprint_prompt_GPT_Nano_Run1.rtf
+Preprint_prompt_GPT_Nano_Run2.rtf
+Preprint_prompt_GPT_Nano_Run3.txt
+Preprint_prompt_GPT_Nano_Run4.txt
+
+Simple_promt_Run1.rtf
+Simple_promt_Run2.rtf
+Simple_promt_Run3.rtf
+Simple_promt_Run4.rtf
+```
+
+---
+
+## Research Question
+
+Our main research question was:
+
+> How sensitive and how stable is AutoRecLab when the same recommender-systems task is given with different levels of prompt detail?
+
+We tested whether more detailed prompts improve AutoRecLab's formal success rate and whether repeated runs with the same prompt and model produce stable results.
+
+---
+
+## Prompt Variants
+
+We used three prompt variants with increasing levels of detail.
+
+### 1. Simple Prompt
+
+```text
+Implement a simple collaborative filtering recommender system using the MovieLens dataset.
+```
+
+This prompt leaves most design decisions to AutoRecLab, including algorithm choice, dataset handling, and evaluation metrics.
+
+### 2. Detailed Prompt
+
+```text
+Implement a collaborative filtering recommender using matrix factorization.
+Load data from movielens.csv in the working directory.
+Evaluate with RMSE and MAE metrics.
+```
+
+This prompt explicitly defines the algorithm family, the dataset filename, and the evaluation metrics.
+
+### 3. Preprint Prompt
+
+```text
+I’d like to run an experiment to quantify how much data split random seeds affect recommender system accuracy. Please use LensKit 0.14.4 to test three algorithms: ALS, ItemKNN, and Pop. Run this on the following three datasets with implicit feedback: MovieLens100K, Amazon Video Games, Last.FM. The raw files are stored in your working directory with the filenames u.data, VideoGames.csv, UserTaggedArtists-timestamps.dat. First, preprocess all datasets with 5-core filtering. For the Amazon and MovieLens datasets, please also convert any ratings greater than 3 to implicit interactions. Here’s the main experimental procedure: Generate 5 different random seeds for data splitting. For each algorithm, dataset, and seed, please do a user-based 80/20 holdout split. Train all models using standard hyperparameters. For the analysis, I need you to measure nDCG@k and Precision@k for k=1, 5, 10 and conduct a short statistical analysis.
+```
+
+This prompt is the most complex one. It requests a multi-dataset, multi-algorithm experiment with five random seeds and ranking metrics.
+
+---
+
+## Experimental Setup
+
+We ran AutoRecLab locally via **UV**, not Docker.
+
+Experiments were conducted on two machines:
+
+- MacBook Air with Apple Silicon, macOS
+- Windows desktop
+
+We used two LLM backends:
+
+- `gpt-5-nano`
+- `gpt-5.4`
+
+The model was changed manually in `config.toml`.
+
+---
+
+## Model Configuration
+
+The LLM backend used by AutoRecLab can be changed in:
+
+```text
+config.toml
+```
+
+Relevant section:
+
+```toml
+[agent.code]
+model = "gpt-5-nano"
+model_temp = 1.0
+```
+
+For our experiments, we used `gpt-5-nano` for the Simple and Detailed prompts and both `gpt-5-nano` and `gpt-5.4` for the Preprint prompt.
+
+Some model names from the default or attempted configuration were not available or not compatible with our course OpenAI project setup. Therefore, the model name had to be adjusted manually.
+
+---
+
+## Dataset Placement
+
+The raw datasets are not included in this repository due to size. They must be downloaded separately and placed into the expected workspace directory before running the experiments.
+
+For our local UV setup, AutoRecLab expected dataset files in:
+
+```text
+workspace/working/
+```
+
+For the Simple and Detailed prompts, the expected file was:
+
+```text
+workspace/working/movielens.csv
+```
+
+For the Preprint prompt, the expected files were:
+
+```text
+workspace/working/u.data
+workspace/working/VideoGames.csv
+workspace/working/UserTaggedArtists-timestamps.dat
+```
+
+During our experiments, dataset placement was one of the recurring sources of errors. The original instructions and the generated code were not always consistent regarding whether files should be placed in `workspace/` or `workspace/working/`.
+
+---
+
+## Reproducing the Experiments
+
+### Windows PowerShell
+
+The minimal command sequence used for our Windows-based runs was:
+
+```powershell
+uv sync
+$env:OPENAI_API_KEY="<your-key>"
+mkdir out
+mkdir workspace
+uv run main.py
+```
+
+If the folders already exist, the shorter version is sufficient:
+
+```powershell
+uv sync
+$env:OPENAI_API_KEY="<your-key>"
+uv run main.py
+```
+
+For a cleaner reproduction setup with datasets, we recommend ensuring that the dataset directory exists:
+
+```powershell
+mkdir out
+mkdir workspace
+mkdir workspace\working
+```
+
+Then place the required dataset files into:
+
+```text
+workspace/working/
+```
+
+Start AutoRecLab:
+
+```powershell
+uv run main.py
+```
+
+Paste one of the prompts listed above and end the input with:
+
+```text
+!start
+```
+
+### macOS / Linux
+
+```bash
+uv sync
+export OPENAI_API_KEY="<your-key>"
+mkdir -p out workspace/working
+uv run main.py
+```
+
+Then paste one of the prompts and end the input with:
+
+```text
+!start
+```
+
+---
+
+## Logs and Score Extraction
+
+AutoRecLab assigns an internal reviewer score to generated candidate nodes. In the logs, these scores appear in lines of the form:
+
+```text
+NodeScore(score=92.0, feedback=..., is_satisfactory=True)
+```
+
+The score is AutoRecLab's internal reviewer rating from 0 to 100. It reflects how well the generated code satisfies the formal requirements generated by AutoRecLab.
+
+However, this score is not the same as scientific validity. A high score can still occur when the run has scientific problems such as overfitting, missing metrics, synthetic data fallback, or algorithm mismatch.
+
+The raw logs can be found in:
+
+```text
+logs/output_log/
+```
+
+---
+
+## Results Summary
+
+The following table summarizes the 16 experimental runs.
+
+| Series | Model | Runs | Satisfactory | Scientifically Valid |
+|---|---|---:|---:|---:|
+| Simple Prompt | GPT-5 Nano | 4 | 1 | 1 |
+| Detailed Prompt | GPT-5 Nano | 4 | 3 | 1 |
+| Preprint Prompt | GPT-5 Nano | 4 | 0 | 0 |
+| Preprint Prompt | GPT-5.4 | 4 | 0 | 0 |
+| **Total** | — | **16** | **4** | **2** |
+
+Main observations:
+
+- More prompt detail improved the formal success rate.
+- Formal success did not imply scientific validity.
+- The Preprint prompt failed in all 8 runs.
+- The internal AutoRecLab score mainly reflected code structure and requirement coverage, not full scientific correctness.
+
+---
+
+## Scientific Validity Assessment
+
+In addition to AutoRecLab's internal score, we manually assessed whether each run was scientifically valid.
+
+A run was counted as valid only if all of the following criteria were satisfied:
+
+1. real data were used, not synthetic fallback data;
+2. the implemented algorithm matched the prompt;
+3. the required metrics were actually reported;
+4. there was no catastrophic overfitting or obvious data leakage.
+
+This manual assessment explains why a run with a high AutoRecLab score could still be considered invalid.
+
+For example, a run could receive a score of 92/100 because the code executed and matched many formal requirements, but still be scientifically invalid if validation error diverged while training error collapsed.
+
+---
+
+## Known Issues Encountered
+
+During reproduction, we encountered several practical issues:
+
+- The `out/` directory was missing on first launch and had to be created manually.
+- Some model names from the original/default configuration were not available in the course OpenAI project.
+- Dataset path handling was inconsistent between `workspace/` and `workspace/working/`.
+- Some generated code failed because `matplotlib` was missing, even though plotting was not essential for the experiment.
+- The Preprint prompt repeatedly triggered LensKit 0.14.4 API incompatibilities.
+- Some runs crashed with `IndexError` when no valid tree-search node was found.
+- On macOS, LensKit-related multiprocessing caused additional stability problems in some runs.
+- The reviewer score did not reliably detect scientific issues such as overfitting or missing final metrics.
+
+These issues motivated our proposed improvements: pre-run validation, more robust error handling, optional plotting, and scientific-validity checks in the reviewer.
+
+---
+
+## Citation / Project Reference
+
+Project title:
+
+```text
+AutoRecLab in the Wild: Prompt Sensitivity Meets Run Stability
+```
+
+Team:
+
+```text
+Team 6
+Ksenia Khokhlova
+Artem Dneprovskii
+Machine Learning Lab
+University of Siegen
+```
